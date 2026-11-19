@@ -1,0 +1,60 @@
+@startuml D3b_secuencia_flujo_basico_pasos_7_11
+!include ../estilo.iuml
+title Vista dinámica de diseño - CU 36 - Flujo descripto, pasos 7 a 11
+hide footbox
+actor "EB" as eb
+boundary ":PantallaConsultar\nSeguimientoBolsines" as pan
+control ":GestorConsultar\nSeguimientoBolsines" as ges
+entity ":Bolsin" as bol
+participant ":PosicionBolsin" as pos <<dto>>
+entity ":Empleado" as emp
+entity ":Rol" as rol
+entity "gerente\n:Empleado" as ger
+control ":GestorNotificar\nUbicacionBolsin" as gnu
+boundary ":InterfazServidor\nCorreo" as isc
+
+eb -> pan : tomarSeleccionBolsin(numeroBolsin: int): VistaSeguimiento
+activate pan
+pan -> ges : tomarSeleccionBolsin(numeroBolsin: int): void
+activate ges
+ges -> bol : ~*getNumeroBolsin(): int
+ges -> ges : buscarPosicionBolsin(numeroBolsin: int): PosicionBolsin
+ges -> pos : ~*getNumeroBolsin(): int
+ges -> pan : solicitarConfirmacionEnvioMail(posicion: PosicionBolsin): void
+deactivate ges
+pan -> pan : armarVista(): VistaSeguimiento
+deactivate pan
+
+eb -> pan : tomarConfirmacionEnvioMail(confirma: boolean): VistaSeguimiento
+activate pan
+pan -> ges : tomarConfirmacionEnvioMail(confirma: boolean): void
+activate ges
+ges -> ges : buscarMailGerenteCMDestino(): void
+ges -> bol : obtenerCMDestino(): ComisionMedica
+loop mientras haya empleados
+  ges -> emp : sosGCM(cm: ComisionMedica): boolean
+  activate emp
+  emp -> emp : esTuCM(cm: ComisionMedica): boolean
+  emp -> rol : esGCM(): boolean
+  deactivate emp
+end
+ges -> ger : getEmail(): String
+
+ges -> ges : llamarCUNotificarUbicacionBolsin(): void
+ges -> pos : getNumeroBolsin(): int
+ges -> pos : getFechaHoraUltimaActualizacion(): LocalDateTime
+ges -> pos : getLatitud(): double
+ges -> pos : getLongitud(): double
+ges -> gnu : notificarUbicacionBolsin(mailGerente: String, numeroBolsin: int,\nfechaHoraUltimaActualizacion: LocalDateTime, latitud: double, longitud: double): void
+activate gnu
+note right of gnu : <<include>>\nCU 31 Notificar\nubicación de bolsín
+gnu -> isc : enviarMail(destinatario: String, asunto: String, cuerpo: String): void
+deactivate gnu
+ges -> pan : informarEnvioExitoso(mailGerente: String): void
+pan -> pos : getNumeroBolsin(): int
+pan -> pos : getNombreCMDestino(): String
+ges -> ges : finCU(): void
+deactivate ges
+pan -> pan : armarVista(): VistaSeguimiento
+deactivate pan
+@enduml

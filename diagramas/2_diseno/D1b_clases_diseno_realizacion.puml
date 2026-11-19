@@ -1,0 +1,250 @@
+@startuml D1b_clases_diseno_realizacion
+!include ../estilo.iuml
+title Vista estática de diseño de la realización - CU 36 Consultar seguimiento de bolsines
+hide empty members
+
+class PantallaConsultarSeguimientoBolsines <<boundary>> {
+  - cmUsuarioLogueado: String
+  - mapaBolsines: MapaBolsines
+  - bolsinesSinUbicacion: List<Integer>
+  - bolsinSeleccionado: PosicionBolsin
+  - mensaje: String
+  - paso: String
+  --
+  + opcionConsultarSeguimientoBolsines(): VistaSeguimiento
+  + habilitarPantalla(): void
+  + mostrarCMUsuarioLogueado(nombreCM: String): void
+  + mostrarBolsinesEnMapa(mapa: MapaBolsines): void
+  + informarBolsinesSinUbicacion(numerosBolsin: List<Integer>): void
+  + informarSinBolsinesEnviados(): void
+  + solicitarSeleccionBolsin(): void
+  + tomarFiltro(numeroPrecinto: Integer, codigoCMDestino: String): VistaSeguimiento
+  + informarPrecintoInexistente(numeroPrecinto: Integer): void
+  + informarSinCoincidenciasFiltro(): void
+  + tomarSeleccionBolsin(numeroBolsin: int): VistaSeguimiento
+  + solicitarConfirmacionEnvioMail(posicion: PosicionBolsin): void
+  + tomarConfirmacionEnvioMail(confirma: boolean): VistaSeguimiento
+  + informarEnvioExitoso(mailGerente: String): void
+  + informarMailNoEnviado(): void
+  + tomarCancelacion(): VistaSeguimiento
+  - armarVista(): VistaSeguimiento
+}
+
+class GestorConsultarSeguimientoBolsines <<control>> {
+  - cmUsuarioLogueado: ComisionMedica
+  - bolsinesEnviados: List<Bolsin>
+  - posicionesBolsines: List<PosicionBolsin>
+  - bolsinesSinUbicacion: List<Integer>
+  - bolsinSeleccionado: Bolsin
+  - posicionBolsinSeleccionado: PosicionBolsin
+  - mailGerenteCMDestino: String
+  --
+  + consultarSeguimientoBolsines(): void
+  - buscarCMUsuarioLogueado(): void
+  - buscarBolsinesEnviados(): void
+  - obtenerUbicacionBolsines(): void
+  - armarMapaDePosicionDeBolsines(): void
+  + tomarFiltro(numeroPrecinto: Integer, codigoCMDestino: String): void
+  + tomarSeleccionBolsin(numeroBolsin: int): void
+  - buscarPosicionBolsin(numeroBolsin: int): PosicionBolsin
+  + tomarConfirmacionEnvioMail(confirma: boolean): void
+  - buscarMailGerenteCMDestino(): void
+  - llamarCUNotificarUbicacionBolsin(): void
+  + cancelarCU(): void
+  - finCU(): void
+}
+
+class GestorNotificarUbicacionBolsin <<control>> {
+  + notificarUbicacionBolsin(mailGerente: String, numeroBolsin: int, fechaHoraUltimaActualizacion: LocalDateTime, latitud: double, longitud: double): void
+}
+
+class InterfazServidorCorreo <<boundary>> {
+  + enviarMail(destinatario: String, asunto: String, cuerpo: String): void
+}
+
+class InterfazGoogleMaps <<boundary>> {
+  + obtenerMapa(posiciones: List<PosicionBolsin>): MapaBolsines
+  - calcularZoom(extensionEnGrados: double): int
+}
+
+class GestorSesion <<control>> {
+  + getSesionActual(): Sesion
+}
+note bottom of GestorSesion : Soporte: CU 5 Iniciar sesión\ny CU 6 Cerrar sesión
+
+  class InterfazGPSTracker <<boundary>> {
+  - claveAPIXTR4500L: String
+  - claveAPINavTrackQX7A: String
+  - claveAPIGeoPulseMTR900: String
+  --
+  + obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String, modeloGPSTracker: String): UbicacionBolsin
+  - crearAdaptador(modeloGPSTracker: String): IAdaptadorGPSTracker
+}
+  class UbicacionBolsin <<dto>> {
+  - numeroBolsin: int
+  - latitud: double
+  - longitud: double
+  - fechaHoraUltimaActualizacion: LocalDateTime
+  --
+  + new(numeroBolsin: int, latitud: double, longitud: double, fechaHoraUltimaActualizacion: LocalDateTime)
+  + getLatitud(): double
+  + getLongitud(): double
+  + getFechaHoraUltimaActualizacion(): LocalDateTime
+}
+note right of InterfazGPSTracker : Cliente del patrón Adapter\n(ver la estructura del Adapter)
+class PosicionBolsin <<dto>> {
+  - numeroBolsin: int
+  - numeroPrecinto: int
+  - codigoCMDestino: String
+  - nombreCMDestino: String
+  - modeloGPSTracker: String
+  - latitud: double
+  - longitud: double
+  - fechaHoraUltimaActualizacion: LocalDateTime
+  --
+  + new(numeroBolsin: int, numeroPrecinto: int, codigoCMDestino: String, nombreCMDestino: String, modeloGPSTracker: String, latitud: double, longitud: double, fechaHoraUltimaActualizacion: LocalDateTime)
+  + getNumeroBolsin(): int
+  + getNumeroPrecinto(): int
+  + getCodigoCMDestino(): String
+  + getNombreCMDestino(): String
+  + getModeloGPSTracker(): String
+  + getLatitud(): double
+  + getLongitud(): double
+  + getFechaHoraUltimaActualizacion(): LocalDateTime
+}
+
+class VistaSeguimiento <<dto>> {
+  - cmUsuarioLogueado: String
+  - mapaBolsines: MapaBolsines
+  - bolsinesSinUbicacion: List<Integer>
+  - bolsinSeleccionado: PosicionBolsin
+  - mensaje: String
+  - paso: String
+  --
+  + new(cmUsuarioLogueado: String, mapaBolsines: MapaBolsines, bolsinesSinUbicacion: List<Integer>, bolsinSeleccionado: PosicionBolsin, mensaje: String, paso: String)
+  + getCmUsuarioLogueado(): String
+  + getMapaBolsines(): MapaBolsines
+  + getBolsinesSinUbicacion(): List<Integer>
+  + getBolsinSeleccionado(): PosicionBolsin
+  + getMensaje(): String
+  + getPaso(): String
+}
+
+class MapaBolsines <<dto>> {
+  - latitudCentro: double
+  - longitudCentro: double
+  - zoom: int
+  - posiciones: List<PosicionBolsin>
+  --
+  + new(latitudCentro: double, longitudCentro: double, zoom: int, posiciones: List<PosicionBolsin>)
+  + getLatitudCentro(): double
+  + getLongitudCentro(): double
+  + getZoom(): int
+  + getPosiciones(): List<PosicionBolsin>
+}
+note bottom of VistaSeguimiento : Los getters de VistaSeguimiento y MapaBolsines\nlos usa la conversión a JSON que se envía al navegador.
+
+class Sesion <<entity>> {
+  - fechaHoraInicio: LocalDateTime
+  - fechaHoraFin: LocalDateTime
+  --
+  + getUsuario(): Usuario
+}
+
+class Usuario <<entity>> {
+  - nombre: String
+  - password: String
+}
+
+class Empleado <<entity>> {
+  - apellido: String
+  - email: String
+  - nombre: String
+  --
+  + esTuUsuario(usuario: Usuario): boolean
+  + getCM(): ComisionMedica
+  + sosGCM(cm: ComisionMedica): boolean
+  + esTuCM(cm: ComisionMedica): boolean
+  + getEmail(): String
+}
+
+class Rol <<entity>> {
+  - descripcion: String
+  - nombre: String
+  --
+  + esGCM(): boolean
+}
+
+class ComisionMedica <<entity>> {
+  - codigo: String
+  - direccion: String
+  - email: String
+  - nombre: String
+  - telefono: String
+  --
+  + getNombre(): String
+  + getCodigo(): String
+}
+
+class Bolsin <<entity>> {
+  - fecha: LocalDate
+  - numeroBolsin: int
+  - numeroPrecinto: int
+  - peso: double
+  - modeloGPSTracker: String
+  --
+  + esTuCMOrigen(cm: ComisionMedica): boolean
+  + sosEnviado(): boolean
+  + getNumeroBolsin(): int
+  + getNroPrecinto(): int
+  + getModeloGPSTracker(): String
+  + obtenerCMDestino(): ComisionMedica
+}
+
+class CambioEstadoBolsin <<entity>> {
+  - fechaHoraInicio: LocalDateTime
+  - fechaHoraFin: LocalDateTime
+  --
+  + sosActual(): boolean
+  + sosEnviado(): boolean
+}
+
+class Estado <<entity>> {
+  - ambito: String
+  - descripcion: String
+  - nombre: String
+  --
+  + esAmbitoBolsin(): boolean
+  + esEnviado(): boolean
+}
+
+PantallaConsultarSeguimientoBolsines ..> GestorConsultarSeguimientoBolsines
+GestorConsultarSeguimientoBolsines ..> PantallaConsultarSeguimientoBolsines
+GestorConsultarSeguimientoBolsines ..> InterfazGPSTracker
+GestorConsultarSeguimientoBolsines ..> InterfazGoogleMaps
+GestorConsultarSeguimientoBolsines ..> GestorNotificarUbicacionBolsin
+GestorNotificarUbicacionBolsin ..> InterfazServidorCorreo
+GestorConsultarSeguimientoBolsines ..> GestorSesion
+GestorSesion ..> Sesion
+PantallaConsultarSeguimientoBolsines ..> PosicionBolsin
+GestorConsultarSeguimientoBolsines ..> Sesion
+GestorConsultarSeguimientoBolsines ..> Empleado
+GestorConsultarSeguimientoBolsines ..> Bolsin
+GestorConsultarSeguimientoBolsines ..> PosicionBolsin
+InterfazGoogleMaps ..> MapaBolsines
+InterfazGPSTracker ..> UbicacionBolsin
+PantallaConsultarSeguimientoBolsines ..> VistaSeguimiento
+MapaBolsines o-- "0..*" PosicionBolsin
+
+
+Sesion --> "1" Usuario : usuario
+Empleado --> "1" Usuario : usuario
+Empleado --> "1" ComisionMedica : asignadoA
+Empleado --> "1" Rol : rol
+Bolsin --> "1" ComisionMedica : origen
+Bolsin --> "1" ComisionMedica : destino
+Bolsin --> "1..*" CambioEstadoBolsin : cambioEstado
+CambioEstadoBolsin --> "1" Estado : estado
+CambioEstadoBolsin --> "1" Empleado : responsableCE
+note top of Bolsin : Las entidades tienen además métodos de soporte\npara otros CU (inicio de sesión y carga de datos)\nque no participan del CU 36 y no se muestran.
+@enduml

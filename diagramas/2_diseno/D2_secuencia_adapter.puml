@@ -1,0 +1,40 @@
+@startuml D2_secuencia_adapter
+!include ../estilo.iuml
+title Vista dinámica de diseño - Rediseño con Adapter: obtener ubicación de un bolsín (GPS Tracker XTR-4500L)
+hide footbox
+
+control ":GestorConsultar\nSeguimientoBolsines" as ges
+boundary ":InterfazGPSTracker" as igps
+participant ":AdaptadorGPSTracker\nXTR4500L" as ada <<adapter>>
+participant ":ServicioGPSTracker\nXTR4500L" as ser <<adaptee>>
+participant ":UbicacionBolsin" as ubi <<dto>>
+
+activate ges
+ges -> igps : obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String,\ncodigoCMDestino: String, modeloGPSTracker: String): UbicacionBolsin
+activate igps
+igps -> igps : crearAdaptador(modeloGPSTracker: String): IAdaptadorGPSTracker
+create ada
+igps -> ada : new(claveAPI: String)
+activate ada
+create ser
+ada -> ser : new()
+deactivate ada
+igps -> ada : obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String,\ncodigoCMDestino: String): UbicacionBolsin
+activate ada
+ada -> ada : solicitarUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String,\ncodigoCMDestino: String): void
+activate ada
+ada -> ser : getBolsinLocation(apiKey: String, numeroBolsin: int,\ncodigoCMOrigen: String): String
+activate ser
+ser --> ada : JSON (String)
+deactivate ser
+deactivate ada
+ada -> ada : adaptarUbicacionBolsin(): void
+activate ada
+create ubi
+ada -> ubi : new(numeroBolsin: int, latitud: double, longitud: double,\nfechaHoraUltimaActualizacion: LocalDateTime)
+deactivate ada
+ada --> igps : ubicacionAdaptada: UbicacionBolsin
+deactivate ada
+igps --> ges : UbicacionBolsin
+deactivate igps
+@enduml

@@ -1,0 +1,71 @@
+@startuml A2a_secuencia_analisis_pasos_1_6
+!include ../estilo.iuml
+title Vista de interacción de análisis (corregida) - CU 36 - Flujo descripto, pasos 1 a 6
+hide footbox
+actor "EB" as eb
+boundary ":PantallaConsultar\nSeguimientoBolsines" as pan
+control ":GestorConsultar\nSeguimientoBolsines" as ges
+entity "actual\n:Sesion" as ses
+entity ":Empleado" as emp
+entity "logueado\n:Empleado" as log
+entity "deLogueado\n:ComisionMedica" as cml
+entity ":ComisionMedica" as cm
+entity ":Bolsin" as bol
+entity ":CambioEstado\nBolsin" as ce
+entity "actual\n:CambioEstadoBolsin" as cea
+entity ":Estado" as est
+boundary ":InterfazGPSTracker" as gps
+actor "GPS Tracker" as gpsa
+boundary ":InterfazGoogleMaps" as igm
+actor "Servidor\nGoogle Maps" as sgm
+
+eb -> pan : opcionConsultarSeguimientoBolsines()
+activate pan
+pan -> pan : habilitarPantalla()
+pan -> ges : consultarSeguimientoBolsines()
+activate ges
+
+ges -> ges : buscarCMUsuarioLogueado()
+ges -> ses : getUsuario()
+ges -> emp : ~*esTuUsuario()
+ges -> log : getCM()
+ges -> cml : getNombre()
+ges -> pan : mostrarCMUsuarioLogueado()
+
+ges -> ges : buscarBolsinesEnviados()
+loop mientras haya bolsines
+  ges -> bol : esTuCMOrigen()
+  ges -> bol : sosEnviado()
+  activate bol
+  bol -> ce : ~*sosActual()
+  bol -> cea : sosEnviado()
+  activate cea
+  cea -> est : esAmbitoBolsin()
+  cea -> est : esEnviado()
+  deactivate cea
+  deactivate bol
+end
+
+ges -> ges : obtenerUbicacionBolsines()
+loop mientras haya bolsines enviados
+  ges -> bol : getNumeroBolsin()
+  ges -> bol : getModeloGPSTracker()
+  ges -> bol : obtenerCMDestino()
+  ges -> cml : getCodigo()
+  ges -> cm : getCodigo()
+  ges -> gps : obtenerUbicacionBolsin()
+  activate gps
+  gps -> gpsa : getBolsinLocation()
+  deactivate gps
+  ges -> bol : getNroPrecinto()
+  ges -> cm : getNombre()
+end
+
+ges -> ges : armarMapaDePosicionDeBolsines()
+ges -> igm : obtenerMapa()
+activate igm
+igm -> sgm : getMapa()
+deactivate igm
+ges -> pan : mostrarBolsinesEnMapa()
+pan -> pan : solicitarSeleccionBolsin()
+@enduml

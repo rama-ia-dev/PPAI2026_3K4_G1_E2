@@ -1,0 +1,21 @@
+@startuml A4_maquina_estados_remito
+!include ../estilo.iuml
+title Máquina de estados de la clase Remito (corregida)
+hide empty description
+skinparam state {
+  BackgroundColor #FFF6DD
+  BorderColor #A98B2E
+}
+[*] --> Creado : 15 Generar Remito /new()
+Creado --> Creado : 16 Modificar Remito\n/modificarDocumentacionIncluida()
+Creado --> Cancelado : 17 Cancelar Remito /cancelar()
+Creado --> EnBolsinSaliente : 19 Generar Bolsín /asociarABolsin()
+Creado --> EnBolsinSaliente : 20 Modificar Bolsín [se agrega el remito] /asociarABolsin()
+EnBolsinSaliente --> Creado : 20 Modificar Bolsín [se quita el remito] /quitarDeBolsin()\n21 Eliminar Bolsín /quitarDeBolsin()
+EnBolsinSaliente --> EnBolsinEnviado : 27 Registrar el retiro de bolsines /enviar()
+EnBolsinEnviado --> RecibidoYAceptado : 28 Registrar recepción de bolsín\n[toda la documentación es aceptada] /registrarRecepcion()
+EnBolsinEnviado --> RecibidoYAceptadoParcial : 28 Registrar recepción de bolsín\n[no toda la documentación es aceptada] /registrarRecepcion()
+Cancelado --> [*]
+RecibidoYAceptado --> [*]
+RecibidoYAceptadoParcial --> [*]
+@enduml

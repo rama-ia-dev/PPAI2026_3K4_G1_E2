@@ -1,0 +1,19 @@
+@startuml A3_maquina_estados_bolsin
+!include ../estilo.iuml
+title Máquina de estados de la clase Bolsín (corregida)
+hide empty description
+skinparam state {
+  BackgroundColor #FFF6DD
+  BorderColor #A98B2E
+}
+[*] --> Creado : 19 Generar Bolsín /new()
+Creado --> Creado : 20 Modificar Bolsín /modificarBolsin()
+Creado --> Cerrado : 39 Cerrar Bolsín /cerrar()
+Cerrado --> Creado : 40 Reabrir Bolsín /reabrir()
+Creado --> DeBaja : 21 Eliminar Bolsín /darDeBaja()
+Cerrado --> DeBaja : 21 Eliminar Bolsín /darDeBaja()
+Cerrado --> Enviado : 27 Registrar el retiro de bolsines /enviar()
+Enviado --> RecibidoEnCMDestino : 28 Registrar recepción de bolsín /registrarRecepcion()
+DeBaja --> [*]
+RecibidoEnCMDestino --> [*]
+@enduml

@@ -1,0 +1,28 @@
+!pragma layout smetana
+skinparam dpi 160
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor<<boundary>> #DDF3FB
+  BorderColor<<boundary>> #2B7A99
+  BackgroundColor<<control>> #E3F5E1
+  BorderColor<<control>> #3C8A35
+  BackgroundColor<<entity>> #FFF6DD
+  BorderColor<<entity>> #A98B2E
+  BackgroundColor<<interface>> #F9D9E3
+  BorderColor<<interface>> #B03A5B
+  BackgroundColor<<adapter>> #FFF3A6
+  BorderColor<<adapter>> #A58F00
+  BackgroundColor<<adaptee>> #E4EEFF
+  BorderColor<<adaptee>> #3E62A8
+  BackgroundColor<<dto>> #F2F2F2
+  BorderColor<<dto>> #777777
+}
+skinparam sequence {
+  LifeLineBorderColor #555555
+  ParticipantBackgroundColor #FFFFFF
+  ArrowColor #222222
+}

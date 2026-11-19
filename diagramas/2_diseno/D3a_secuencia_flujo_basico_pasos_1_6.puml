@@ -1,0 +1,86 @@
+@startuml D3a_secuencia_flujo_basico_pasos_1_6
+!include ../estilo.iuml
+title Vista dinámica de diseño - CU 36 - Flujo descripto, pasos 1 a 6 (GPS Tracker XTR-4500L)
+hide footbox
+actor "EB" as eb
+boundary ":PantallaConsultar\nSeguimientoBolsines" as pan
+control ":GestorConsultar\nSeguimientoBolsines" as ges
+control ":GestorSesion" as gses
+entity "actual\n:Sesion" as ses
+entity ":Empleado" as emp
+entity "logueado\n:Empleado" as log
+entity "deLogueado\n:ComisionMedica" as cml
+entity ":Bolsin" as bol
+entity ":CambioEstado\nBolsin" as ce
+entity "actual\n:CambioEstadoBolsin" as cea
+entity ":Estado" as est
+entity ":ComisionMedica" as cm
+boundary ":InterfazGPSTracker" as gps
+participant ":UbicacionBolsin" as ubi <<dto>>
+participant ":PosicionBolsin" as pos <<dto>>
+boundary ":InterfazGoogleMaps" as igm
+participant ":MapaBolsines" as mapa <<dto>>
+
+eb -> pan : opcionConsultarSeguimientoBolsines(): VistaSeguimiento
+activate pan
+pan -> pan : habilitarPantalla(): void
+pan -> ges : consultarSeguimientoBolsines(): void
+activate ges
+
+ges -> ges : buscarCMUsuarioLogueado(): void
+ges -> gses : getSesionActual(): Sesion
+ges -> ses : getUsuario(): Usuario
+ges -> emp : ~*esTuUsuario(usuario: Usuario): boolean
+ges -> log : getCM(): ComisionMedica
+ges -> cml : getNombre(): String
+ges -> pan : mostrarCMUsuarioLogueado(nombreCM: String): void
+
+ges -> ges : buscarBolsinesEnviados(): void
+loop mientras haya bolsines
+  ges -> bol : esTuCMOrigen(cm: ComisionMedica): boolean
+  ges -> bol : sosEnviado(): boolean
+  activate bol
+  bol -> ce : ~*sosActual(): boolean
+  bol -> cea : sosEnviado(): boolean
+  activate cea
+  cea -> est : esAmbitoBolsin(): boolean
+  cea -> est : esEnviado(): boolean
+  deactivate cea
+  deactivate bol
+end
+
+ges -> ges : obtenerUbicacionBolsines(): void
+loop mientras haya bolsines enviados
+  ges -> bol : getNumeroBolsin(): int
+  ges -> bol : getModeloGPSTracker(): String
+  ges -> bol : obtenerCMDestino(): ComisionMedica
+  ges -> cml : getCodigo(): String
+  ges -> cm : getCodigo(): String
+  ges -> gps : obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String,\ncodigoCMDestino: String, modeloGPSTracker: String): UbicacionBolsin
+  ref over gps, ubi : Rediseño con Adapter (ver secuencia del patrón Adapter):\ncrea y devuelve :UbicacionBolsin
+  ges -> bol : getNroPrecinto(): int
+  ges -> cm : getNombre(): String
+  ges -> ubi : getLatitud(): double
+  ges -> ubi : getLongitud(): double
+  ges -> ubi : getFechaHoraUltimaActualizacion(): LocalDateTime
+  create pos
+  ges -> pos : new(numeroBolsin, numeroPrecinto, codigoCMDestino, nombreCMDestino,\nmodeloGPSTracker, latitud, longitud, fechaHoraUltimaActualizacion)
+end
+
+ges -> ges : armarMapaDePosicionDeBolsines(): void
+ges -> igm : obtenerMapa(posiciones: List<PosicionBolsin>): MapaBolsines
+activate igm
+loop mientras haya posiciones
+  igm -> pos : getLatitud(): double
+  igm -> pos : getLongitud(): double
+end
+igm -> igm : calcularZoom(extensionEnGrados: double): int
+create mapa
+igm -> mapa : new(latitudCentro, longitudCentro, zoom, posiciones)
+deactivate igm
+ges -> pan : mostrarBolsinesEnMapa(mapa: MapaBolsines): void
+pan -> pan : solicitarSeleccionBolsin(): void
+deactivate ges
+pan -> pan : armarVista(): VistaSeguimiento
+deactivate pan
+@enduml

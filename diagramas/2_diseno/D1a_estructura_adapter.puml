@@ -1,0 +1,100 @@
+@startuml D1a_estructura_adapter
+!include ../estilo.iuml
+skinparam dpi 130
+top to bottom direction
+title Estructura del patrón Adapter - CU 36 (Cliente, Objetivo, Adaptadores y Adaptables)
+hide empty members
+class GestorConsultarSeguimientoBolsines <<control>> {
+  - bolsinesEnviados: List<Bolsin>
+  - posicionesBolsines: List<PosicionBolsin>
+  --
+  - obtenerUbicacionBolsines(): void
+}
+
+  class InterfazGPSTracker <<boundary>> {
+    - claveAPIXTR4500L: String
+    - claveAPINavTrackQX7A: String
+    - claveAPIGeoPulseMTR900: String
+    --
+    + obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String, modeloGPSTracker: String): UbicacionBolsin
+    - crearAdaptador(modeloGPSTracker: String): IAdaptadorGPSTracker
+  }
+
+  interface IAdaptadorGPSTracker <<interface>> {
+    + obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): UbicacionBolsin
+    + solicitarUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): void
+    + adaptarUbicacionBolsin(): void
+  }
+
+  class AdaptadorGPSTrackerXTR4500L <<adapter>> {
+    - claveAPI: String
+    - numeroBolsinSolicitado: int
+    - ubicacionRecibida: String
+    - ubicacionAdaptada: UbicacionBolsin
+    --
+    + new(claveAPI: String)
+    + obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): UbicacionBolsin
+    + solicitarUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): void
+    + adaptarUbicacionBolsin(): void
+  }
+
+  class AdaptadorGPSTrackerNavTrackQX7A <<adapter>> {
+    - claveAPI: String
+    - numeroBolsinSolicitado: int
+    - ubicacionRecibida: String
+    - ubicacionAdaptada: UbicacionBolsin
+    --
+    + new(claveAPI: String)
+    + obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): UbicacionBolsin
+    + solicitarUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): void
+    + adaptarUbicacionBolsin(): void
+  }
+
+  class AdaptadorGPSTrackerGeoPulseMTR900 <<adapter>> {
+    - claveAPI: String
+    - numeroBolsinSolicitado: int
+    - ubicacionRecibida: Object[][]
+    - ubicacionAdaptada: UbicacionBolsin
+    --
+    + new(claveAPI: String)
+    + obtenerUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): UbicacionBolsin
+    + solicitarUbicacionBolsin(numeroBolsin: int, codigoCMOrigen: String, codigoCMDestino: String): void
+    + adaptarUbicacionBolsin(): void
+  }
+
+  class ServicioGPSTrackerXTR4500L <<adaptee>> {
+    + getBolsinLocation(apiKey: String, numeroBolsin: int, codigoCMOrigen: String): String
+  }
+
+  class ServicioGPSTrackerNavTrackQX7A <<adaptee>> {
+    + retrieveTrackingData(apiKey: String, numeroBolsin: int, codigoCMDestino: String): String
+  }
+
+  class ServicioGPSTrackerGeoPulseMTR900 <<adaptee>> {
+    + fetchCargoPositions(apiKey: String, numeroBolsin: int): Object[][]
+  }
+
+  class UbicacionBolsin <<dto>> {
+    - numeroBolsin: int
+    - latitud: double
+    - longitud: double
+    - fechaHoraUltimaActualizacion: LocalDateTime
+    --
+    + new(numeroBolsin: int, latitud: double, longitud: double, fechaHoraUltimaActualizacion: LocalDateTime)
+    + getLatitud(): double
+    + getLongitud(): double
+    + getFechaHoraUltimaActualizacion(): LocalDateTime
+  }
+
+GestorConsultarSeguimientoBolsines ..> InterfazGPSTracker
+InterfazGPSTracker ..> IAdaptadorGPSTracker : <<crea y usa>>
+IAdaptadorGPSTracker <|.. AdaptadorGPSTrackerXTR4500L
+IAdaptadorGPSTracker <|.. AdaptadorGPSTrackerNavTrackQX7A
+IAdaptadorGPSTracker <|.. AdaptadorGPSTrackerGeoPulseMTR900
+AdaptadorGPSTrackerXTR4500L *-- "1" ServicioGPSTrackerXTR4500L : servicio
+AdaptadorGPSTrackerNavTrackQX7A *-- "1" ServicioGPSTrackerNavTrackQX7A : servicio
+AdaptadorGPSTrackerGeoPulseMTR900 *-- "1" ServicioGPSTrackerGeoPulseMTR900 : servicio
+AdaptadorGPSTrackerXTR4500L ..> UbicacionBolsin : <<crea>>
+AdaptadorGPSTrackerNavTrackQX7A ..> UbicacionBolsin : <<crea>>
+AdaptadorGPSTrackerGeoPulseMTR900 ..> UbicacionBolsin : <<crea>>
+@enduml

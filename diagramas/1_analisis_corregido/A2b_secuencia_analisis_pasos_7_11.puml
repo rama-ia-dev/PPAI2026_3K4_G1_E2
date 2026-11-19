@@ -1,0 +1,38 @@
+@startuml A2b_secuencia_analisis_pasos_7_11
+!include ../estilo.iuml
+title Vista de interacción de análisis (corregida) - CU 36 - Flujo descripto, pasos 7 a 11
+hide footbox
+actor "EB" as eb
+boundary ":PantallaConsultar\nSeguimientoBolsines" as pan
+control ":GestorConsultar\nSeguimientoBolsines" as ges
+entity ":Empleado" as emp
+entity ":Bolsin" as bol
+entity ":Rol" as rol
+entity "gerente\n:Empleado" as ger
+collections "CU 31 Notificar\nubicación de bolsín" as cu31
+
+eb -> pan : tomarSeleccionBolsin()
+pan -> ges : tomarSeleccionBolsin()
+ges -> bol : ~*getNumeroBolsin()
+ges -> pan : solicitarConfirmacionEnvioMail()
+eb -> pan : tomarConfirmacionEnvioMail()
+pan -> ges : tomarConfirmacionEnvioMail()
+
+ges -> ges : buscarMailGerenteCMDestino()
+ges -> bol : obtenerCMDestino()
+loop mientras haya empleados
+  ges -> emp : sosGCM()
+  activate emp
+  emp -> emp : esTuCM()
+  emp -> rol : esGCM()
+  deactivate emp
+end
+ges -> ger : getEmail()
+
+ges -> cu31 : llamarCUNotificarUbicacionBolsin()
+note right of cu31 : <<include>>
+ges -> pan : informarEnvioExitoso()
+ges -> ges : finCU()
+deactivate ges
+deactivate pan
+@enduml

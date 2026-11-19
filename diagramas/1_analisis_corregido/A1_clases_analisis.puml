@@ -1,0 +1,143 @@
+@startuml A1_clases_analisis
+!include ../estilo.iuml
+title Vista de clases de análisis (corregida) - CU 36 Consultar seguimiento de bolsines
+hide empty members
+
+class PantallaConsultarSeguimientoBolsines <<boundary>> {
+  cmUsuarioLogueado
+  mapaBolsines
+  bolsinesSinUbicacion
+  bolsinSeleccionado
+  btnConfirmarEnvioMail
+  --
+  opcionConsultarSeguimientoBolsines()
+  habilitarPantalla()
+  mostrarCMUsuarioLogueado()
+  mostrarBolsinesEnMapa()
+  solicitarSeleccionBolsin()
+  tomarSeleccionBolsin()
+  solicitarConfirmacionEnvioMail()
+  tomarConfirmacionEnvioMail()
+  informarEnvioExitoso()
+}
+
+class GestorConsultarSeguimientoBolsines <<control>> {
+  cmUsuarioLogueado
+  bolsinesEnviados
+  ubicacionesBolsines
+  bolsinSeleccionado
+  mailGerenteCMDestino
+  --
+  consultarSeguimientoBolsines()
+  buscarCMUsuarioLogueado()
+  buscarBolsinesEnviados()
+  obtenerUbicacionBolsines()
+  armarMapaDePosicionDeBolsines()
+  tomarSeleccionBolsin()
+  tomarConfirmacionEnvioMail()
+  buscarMailGerenteCMDestino()
+  llamarCUNotificarUbicacionBolsin()
+  finCU()
+}
+
+class InterfazGPSTracker <<boundary>> {
+  obtenerUbicacionBolsin()
+}
+
+class InterfazGoogleMaps <<boundary>> {
+  obtenerMapa()
+}
+
+class Sesion <<entity>> {
+  fechaHoraInicio
+  fechaHoraFin
+  --
+  getUsuario()
+}
+
+class Usuario <<entity>> {
+  nombre
+  password
+}
+
+class Empleado <<entity>> {
+  apellido
+  email
+  nombre
+  --
+  esTuUsuario()
+  getCM()
+  sosGCM()
+  esTuCM()
+  getEmail()
+}
+
+class Rol <<entity>> {
+  descripcion
+  nombre
+  --
+  esGCM()
+}
+
+class ComisionMedica <<entity>> {
+  codigo
+  direccion
+  email
+  nombre
+  telefono
+  --
+  getNombre()
+  getCodigo()
+}
+
+class Bolsin <<entity>> {
+  fecha
+  numeroBolsin
+  numeroPrecinto
+  peso
+  modeloGPSTracker
+  --
+  esTuCMOrigen()
+  sosEnviado()
+  getNumeroBolsin()
+  getNroPrecinto()
+  getModeloGPSTracker()
+  obtenerCMDestino()
+}
+
+class CambioEstadoBolsin <<entity>> {
+  fechaHoraInicio
+  fechaHoraFin
+  --
+  sosActual()
+  sosEnviado()
+}
+
+class Estado <<entity>> {
+  ambito
+  descripcion
+  nombre
+  --
+  esAmbitoBolsin()
+  esEnviado()
+}
+
+PantallaConsultarSeguimientoBolsines ..> GestorConsultarSeguimientoBolsines
+GestorConsultarSeguimientoBolsines ..> PantallaConsultarSeguimientoBolsines
+GestorConsultarSeguimientoBolsines ..> InterfazGPSTracker
+GestorConsultarSeguimientoBolsines ..> InterfazGoogleMaps
+GestorConsultarSeguimientoBolsines ..> Sesion
+GestorConsultarSeguimientoBolsines ..> Empleado
+GestorConsultarSeguimientoBolsines ..> ComisionMedica
+GestorConsultarSeguimientoBolsines ..> Bolsin
+
+Sesion --> "1" Usuario : usuario
+Empleado --> "1" Usuario : usuario
+Empleado --> "1" ComisionMedica : asignadoA
+Empleado --> "1" Rol : rol
+Bolsin --> "1" ComisionMedica : origen
+Bolsin --> "1" ComisionMedica : destino
+Bolsin --> "1..*" CambioEstadoBolsin : cambioEstado
+CambioEstadoBolsin --> "1" Estado : estado
+CambioEstadoBolsin --> "1" Empleado : responsableCE
+@enduml
