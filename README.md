@@ -2,7 +2,7 @@
 
 Trabajo práctico de la materia **Diseño de Sistemas de Información** (Ingeniería en Sistemas de Información, UTN Facultad Regional Córdoba, ciclo 2026, curso 3K4, Grupo 1). Corresponde a la **Entrega 2** del Proyecto Práctico de Aplicación Integrador: el diseño de un caso de uso aplicando un patrón de diseño, y su implementación.
 
-Integrantes: Ramiro Baudo, Ignacio Esquivel, David Frances, Federico Gon y Facundo Santiago Vasquez.
+Integrantes: Ramiro Baudo, Ignacio Esquivel, David Frances, Federico Gon, Joaquin Ozan Helou y Facundo Santiago Vasquez.
 
 ## El caso de estudio
 
